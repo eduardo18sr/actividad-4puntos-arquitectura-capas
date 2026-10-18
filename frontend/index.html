@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!-- CAPA DE PRESENTACIÓN (cliente) · Pantalla del vendedor. Solo muestra datos y los envía al backend por HTTP. -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TiendaCapas · Registrar venta</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<main>
+    <h1>TiendaCapas · Registrar venta</h1>
+
+    <!-- novalidate: las reglas (cantidad, cliente, stock) las aplica la capa de negocio, no el navegador -->
+    <form id="formulario-venta" novalidate>
+        <label for="producto">Producto</label>
+        <select id="producto" name="producto">
+            <option value="">Cargando productos...</option>
+        </select>
+
+        <label for="cantidad">Cantidad</label>
+        <input id="cantidad" name="cantidad" type="number" value="1">
+
+        <label for="cliente">Cliente</label>
+        <input id="cliente" name="cliente" type="text" maxlength="80" placeholder="Nombre del cliente">
+
+        <button id="boton-registrar" type="submit">Registrar venta</button>
+    </form>
+
+    <p id="mensaje" role="status" aria-live="polite"></p>
+
+    <h2>Ventas registradas</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>N°</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Producto</th>
+            <th class="numero">Cantidad</th>
+            <th class="numero">Total</th>
+        </tr>
+        </thead>
+        <tbody id="tabla-ventas"></tbody>
+    </table>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

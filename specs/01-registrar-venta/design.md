@@ -122,9 +122,12 @@ Cada endpoint escribe `log.info("[PRESENTACIÓN] ...")`. El controlador **no val
 - `cargarProductos()`: `fetch('/api/productos')` → llena el select.
 - `cargarVentas()`: `fetch('/api/ventas')` → llena la tabla.
 - Al enviar el formulario: `fetch('/api/ventas', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...})})`.
-  - Si `res.ok`: mensaje verde "Venta registrada: S/ total", limpiar el formulario y volver a llamar `cargarProductos()` y `cargarVentas()`.
-  - Si no: mostrar `error` del JSON en rojo.
+  - Si `res.ok`: mensaje verde "Venta registrada: S/ total", limpiar cantidad (vuelve a 1) y cliente, y volver a llamar `cargarProductos()` y `cargarVentas()`. Se conserva el producto elegido.
+  - Si no: mostrar `error` del JSON en rojo (si la respuesta no trae `error`, un mensaje genérico con el código HTTP).
 - Al cargar la página: `cargarProductos()` y `cargarVentas()`.
+- El formulario lleva `novalidate` y los campos no tienen `required`, `min` ni `max`: así el navegador no bloquea la venta y las reglas RN-01/RN-02 las rechaza la **capa de negocio**, como se muestra en la demo. La única restricción en el HTML es `maxlength="80"`.
+- La tabla se arma con `textContent` (no `innerHTML`), porque el nombre del cliente lo escribe el usuario.
+- Cada llamada escribe en la consola del navegador `[FRONTEND] GET/POST /api/...`, el primer paso del recorrido que luego sigue en la consola del backend.
 
 `estilos.css`: unas pocas reglas para que se lea bien en la grabación (fuente grande, tabla con bordes, verde/rojo para mensajes).
 

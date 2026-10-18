@@ -36,6 +36,8 @@ Reglas de negocio: RN-01 a RN-03 (`specs/steering/producto.md`).
 3. SI la cantidad supera el stock, ENTONCES EL SISTEMA DEBE responder `400` con "Stock insuficiente: disponible n" (RN-02).
 4. SI el producto no existe, ENTONCES EL SISTEMA DEBE responder `400` con "El producto no existe".
 5. CUANDO la venta se rechaza, EL SISTEMA NO DEBE guardar la venta ni cambiar el stock, y la página DEBE mostrar el mensaje en rojo.
+6. SI el nombre del cliente supera 80 caracteres, ENTONCES EL SISTEMA DEBE responder `400` con "El nombre del cliente no puede superar 80 caracteres" (RN-01).
+7. SI dos ventas del mismo producto llegan al mismo tiempo y entre ambas superan el stock, ENTONCES EL SISTEMA DEBE registrar solo la que alcance y rechazar la otra con "Stock insuficiente: disponible n"; el stock NUNCA DEBE quedar negativo (RN-02).
 
 ### VEN-4 · Ver ventas registradas
 

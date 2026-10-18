@@ -94,7 +94,7 @@ Pasos de `registrarVenta`:
 4. RN-02: si `cantidad > producto.stock()` → `VentaException("Stock insuficiente: disponible " + stock)`.
 5. RN-03: `total = producto.precio().multiply(BigDecimal.valueOf(cantidad)).setScale(2, RoundingMode.HALF_UP)`.
 6. Si `descontarStock(productoId, cantidad)` devuelve `false` (otra venta se llevó el stock entre el paso 4 y este), volver a leer el producto y lanzar `VentaException("Stock insuficiente: disponible " + stockActual)` (RN-02, VEN-3.7).
-7. `guardar(new Venta(null, productoId, producto.nombre(), cliente.trim(), cantidad, total, LocalDateTime.now()))` y devolver el resultado.
+7. `guardar(new Venta(null, productoId, producto.nombre(), cliente.trim(), cantidad, total, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)))` y devolver el resultado. La fecha se trunca a segundos para que la que se devuelve coincida con la guardada en la BD.
 
 ## Capa de Presentación
 

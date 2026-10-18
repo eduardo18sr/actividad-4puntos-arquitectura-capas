@@ -1,46 +1,46 @@
-# TiendaCapas · Arquitectura en Capas
+# TiendaCapas · Arquitectura en Capas (Grupo 5)
 
 Actividad grupal de Ingeniería de Software II (2026-2) · **Parte C: implementación y demostración en vivo**.
-Estilo asignado: **Arquitectura en Capas**. Caso acotado: **página web de ventas**. Tecnología: **Java 21 + Spring Boot**.
+Estilo asignado: **Arquitectura en Capas**. Caso acotado: **registrar una venta**. Tecnología: **Java 21 + Spring Boot + H2**.
 
-El enunciado completo de la actividad está en `ISW2_Actividad_Grupal_Arquitecturas_Software (1).md`.
+El enunciado completo está en `ISW2_Actividad_Grupal_Arquitecturas_Software (1).md`.
+
+## Idea en una línea
+
+Una sola funcionalidad —**registrar una venta**— que atraviesa todas las capas: la página web (frontend) envía la venta, el backend la valida y calcula el total, y la base de datos la guarda. **No se busca complejidad**: se busca que las capas se vean y se puedan explicar.
+
+```
+Navegador: index.html + app.js                       ← FRONTEND
+        │  HTTP / JSON (fetch)
+        ▼
+ PRESENTACIÓN   VentaController      recibe y responde  ┐
+        │                                                │
+        ▼                                                │ BACKEND
+ NEGOCIO        VentaService         reglas y cálculo    │ (Spring Boot)
+        │                                                │
+        ▼                                                │
+ DATOS          ProductoRepository   SQL (JdbcTemplate)  │
+                VentaRepository                          ┘
+        │  JDBC
+        ▼
+ BASE DE DATOS  H2: tablas producto y venta
+```
+
+Cada capa **solo llama a la de abajo**. El frontend nunca toca la BD; el controlador nunca escribe SQL; el repositorio nunca decide reglas de negocio.
 
 ## Cómo está organizado (SDD)
 
-El proyecto se construye con **desarrollo guiado por especificaciones**: requisitos → diseño → tareas, una spec por funcionalidad. Todavía **no hay código**; se escribe siguiendo las specs en orden.
+Primero se especifica, luego se codea. Una sola spec.
 
 | Ruta | Contenido |
 |---|---|
 | `AGENTS.md` / `CLAUDE.md` | Reglas para quien implemente (persona o agente de IA) |
-| `specs/steering/producto.md` | Qué es la tienda, alcance, actores, **reglas de negocio RN-01 a RN-10**, glosario |
-| `specs/steering/tecnologia.md` | Stack, justificación de cada elección, comandos y configuración |
-| `specs/steering/estructura.md` | Las capas, **reglas de dependencia AR-01 a AR-07**, árbol de paquetes, convenciones |
-| `specs/arquitectura/arquitectura.md` | Metas, escenarios de calidad, restricciones, diagramas (capas, dominio, secuencia, C4), decisiones y **por qué es Arquitectura en Capas** |
-| `specs/00-fundaciones-capas/` | Esqueleto, ArchUnit, perfiles de persistencia, traza transversal, errores, semilla |
-| `specs/01-catalogo/` | Listar, buscar, filtrar y ver productos |
-| `specs/02-carrito/` | Carrito con descuento e IGV |
-| `specs/03-registrar-venta/` | Checkout transaccional y comprobante (flujo de la demo) |
-| `specs/04-consultar-ventas/` | Ventas registradas (vista del vendedor) |
-| `specs/demo/guion-video2.md` | Guion minuto a minuto del Video 2 |
-
-Cada carpeta de spec tiene `requirements.md` (historias + criterios EARS), `design.md` (componentes por capa, contratos, SQL, pruebas) y `tasks.md` (tareas con casillas y trazabilidad a requisitos).
-
-## Las capas en una imagen
-
-```
-Navegador ──HTTP──► PRESENTACIÓN  (Spring MVC + Thymeleaf, carrito en sesión)
-                         │ DTO
-                         ▼
-                    APLICACIÓN    (un servicio por caso de uso, @Transactional)
-                         │
-                         ▼
-                      DOMINIO     (reglas de negocio + interfaces DAO, Java puro)
-                         ▲
-                         │ implementa
-                    PERSISTENCIA  (JDBC + H2  |  en memoria, por perfil)
-
-TRANSVERSAL: traza por capa (AOP) y excepción base de negocio
-```
+| `specs/steering/producto.md` | Qué hace el sistema, alcance y reglas de negocio RN-01 a RN-03 |
+| `specs/steering/tecnologia.md` | Stack, justificación y comandos |
+| `specs/steering/estructura.md` | Las capas, reglas de dependencia y árbol de archivos |
+| `specs/arquitectura/arquitectura.md` | Diagramas (capas y secuencia) y **por qué es Arquitectura en Capas** |
+| `specs/01-registrar-venta/` | `requirements.md` → `design.md` → `tasks.md` de la única funcionalidad |
+| `specs/demo/guion-video2.md` | Guion del Video 2 |
 
 ## Comandos (cuando exista el código)
 
@@ -48,10 +48,6 @@ TRANSVERSAL: traza por capa (AOP) y excepción base de negocio
 ./mvnw spring-boot:run
 ```
 
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=memoria
-```
+App en `http://localhost:8080` · consola de BD en `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:mem:tienda`, usuario `sa`, sin contraseña).
 
-```bash
-./mvnw test
-```
+En Windows (PowerShell) usar `.\mvnw.cmd spring-boot:run`.

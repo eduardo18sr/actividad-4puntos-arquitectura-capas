@@ -1,26 +1,24 @@
 # AGENTS.md · Instrucciones para agentes de código (y para el equipo)
 
-Este repositorio sigue **desarrollo guiado por especificaciones (SDD)**: primero se especifica, luego se codea. El código se escribe **solo** a partir de las specs de `specs/`.
+Este repositorio sigue **desarrollo guiado por especificaciones (SDD)**: primero se especifica, luego se codea.
 
 ## Antes de escribir código
 
-1. Leer los tres archivos de steering: `specs/steering/producto.md`, `specs/steering/tecnologia.md` y `specs/steering/estructura.md`.
+1. Leer `specs/steering/producto.md`, `specs/steering/tecnologia.md` y `specs/steering/estructura.md`.
 2. Leer `specs/arquitectura/arquitectura.md`.
-3. Trabajar **una spec a la vez**, en orden: `00-fundaciones-capas` → `01-catalogo` → `02-carrito` → `03-registrar-venta` → `04-consultar-ventas`.
-4. Dentro de una spec: leer `requirements.md` y `design.md`, y ejecutar `tasks.md` **tarea por tarea**, en orden.
+3. Implementar `specs/01-registrar-venta/`: leer `requirements.md` y `design.md`, y ejecutar `tasks.md` tarea por tarea.
 
 ## Reglas obligatorias
 
-- Respetar las reglas de capas AR-01 a AR-07 de `specs/steering/estructura.md`. La presentación **nunca** usa clases del dominio ni de la persistencia; el dominio **nunca** importa Spring, JDBC ni Jakarta.
-- No implementar nada que no esté en una spec. Si falta algo, proponer el cambio en la spec antes de codear.
-- Cada tarea termina con `./mvnw test` en verde (incluido `ArquitecturaCapasTest`) y su casilla marcada `[x]` en el `tasks.md`.
-- Si un nombre de clase, ruta o paquete cambia respecto al diseño, actualizar en el mismo commit `design.md`, `estructura.md` y `arquitectura.md`: los diagramas deben coincidir con el código que se muestra en el video.
-- Código y mensajes al usuario en español; dinero con `BigDecimal`; inyección por constructor.
+- **Mantenerlo simple.** Es una actividad corta: una sola funcionalidad (registrar venta). No agregar login, carrito, IGV, perfiles, AOP, ArchUnit, Docker ni nada que no esté en la spec.
+- Respetar las capas de `specs/steering/estructura.md`: `presentacion` → `negocio` → `datos` → BD. Ninguna capa se salta a otra ni llama hacia arriba.
+- El SQL solo vive en `datos`. Las reglas de negocio (RN-01 a RN-03) solo viven en `negocio`. El controlador no calcula nada.
+- Si un nombre de clase o ruta cambia respecto al diseño, actualizar `design.md`, `estructura.md` y `arquitectura.md` en el mismo commit: los diagramas deben coincidir con lo que se muestra en el video.
+- Código y mensajes en español; dinero con `BigDecimal`; inyección por constructor.
 
 ## Comandos
 
 ```bash
 ./mvnw spring-boot:run
-./mvnw spring-boot:run -Dspring-boot.run.profiles=memoria
 ./mvnw test
 ```

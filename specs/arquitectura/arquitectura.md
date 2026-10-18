@@ -64,7 +64,8 @@ sequenceDiagram
     PR->>DB: SELECT ... FROM producto WHERE id = ?
     S->>S: RN-02 stock suficiente · RN-03 total = precio × cantidad
     S->>PR: descontarStock(productoId, cantidad)
-    PR->>DB: UPDATE producto SET stock = stock - ? WHERE id = ?
+    PR->>DB: UPDATE producto SET stock = stock - ? WHERE id = ? AND stock >= ?
+    PR-->>S: true (1 fila) o false (otra venta se adelantó, VentaException)
     S->>VR: guardar(venta)
     VR->>DB: INSERT INTO venta (...)
     S-->>C: Venta registrada (con id y total)
@@ -79,7 +80,7 @@ Si una regla falla, `VentaService` lanza `VentaException`; el controlador la con
 | Característica del estilo | Evidencia en el código |
 |---|---|
 | Separación por responsabilidad | El controlador no tiene reglas de negocio; el servicio no tiene SQL ni HTTP; el repositorio no tiene reglas. |
-| Capas cerradas, dependencia hacia abajo | `VentaController` solo importa `VentaService`; `VentaService` solo importa los repositorios; los repositorios no importan nada de arriba (mostrar los `import` en el video). |
+| Capas cerradas, dependencia hacia abajo | `VentaController` importa solo de la capa de negocio (`VentaService`, `VentaException`) y de `modelo`, nunca un repositorio; `VentaService` importa los repositorios y `modelo`, nunca nada de `presentacion`; los repositorios importan solo `JdbcTemplate` y `modelo` (mostrar los `import` en el video; detalle en `estructura.md`). |
 | Cada capa ofrece una interfaz a la superior | Controlador → endpoints HTTP; servicio → `registrarVenta(...)`; repositorio → `buscarPorId`, `descontarStock`, `guardar`. |
 | Cambios localizados | Cambiar H2 por PostgreSQL solo toca `application.properties` (y quizá el SQL de `datos`). Cambiar el frontend no toca negocio ni datos. |
 | Recorrido visible | La consola muestra `[PRESENTACIÓN] → [NEGOCIO] → [DATOS]` en cada venta. |

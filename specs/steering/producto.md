@@ -36,8 +36,8 @@ Es deliberadamente pequeño: el objetivo es que **las capas se noten**, no const
 
 | Código | Regla | Mensaje si se incumple |
 |---|---|---|
-| **RN-01** | La cantidad debe ser un entero **≥ 1** y el cliente no puede estar vacío. | "La cantidad debe ser al menos 1" / "Ingresa el nombre del cliente" |
-| **RN-02** | No se puede vender más que el **stock** disponible. Al registrar la venta, el stock **se descuenta**. | "Stock insuficiente: disponible n" |
+| **RN-01** | La cantidad debe ser un entero **≥ 1**. El cliente no puede estar vacío ni superar **80 caracteres** (tamaño de la columna `cliente`). | "La cantidad debe ser al menos 1" / "Ingresa el nombre del cliente" / "El nombre del cliente no puede superar 80 caracteres" |
+| **RN-02** | No se puede vender más que el **stock** disponible. Al registrar la venta, el stock **se descuenta** y **nunca queda negativo**, aunque lleguen dos ventas al mismo tiempo. | "Stock insuficiente: disponible n" |
 | **RN-03** | El **total** lo calcula el backend: `precio del producto × cantidad`, en soles con 2 decimales (`BigDecimal`). El frontend nunca envía el total. | — |
 
 ### Ejemplo (para probar)

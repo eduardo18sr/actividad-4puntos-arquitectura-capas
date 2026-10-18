@@ -25,7 +25,13 @@ Variante: **arquitectura en 3 capas clásica** (presentación, negocio, datos) m
 | **AR-05** | El frontend (`app.js`) solo habla con el backend por HTTP (`/api/...`); nunca con la BD. |
 | **AR-06** | `modelo` no depende de ninguna capa; todas pueden usarlo. |
 
-Se verifican en la revisión de código y se explican en el video abriendo los `import` de cada clase.
+Se verifican en la revisión de código y se explican en el video abriendo los `import` de cada clase. Qué debe verse en cada una:
+
+| Clase | Importa (permitido) | Nunca importa |
+|---|---|---|
+| `VentaController` | `VentaService` y `VentaException` (capa de negocio), `Producto` y `Venta` (`modelo`) | Nada de `datos` |
+| `VentaService` | `ProductoRepository` y `VentaRepository` (capa de datos), `modelo` | Nada de `presentacion` |
+| `ProductoRepository`, `VentaRepository` | `JdbcTemplate`, `modelo` | Nada de `negocio` ni de `presentacion` |
 
 ```
  index.html / app.js ──HTTP──► presentacion ──► negocio ──► datos ──JDBC──► H2
@@ -62,7 +68,7 @@ actividad-4puntos-arquitectura-capas/
 │       │       ├── Producto.java           (record)
 │       │       └── Venta.java              (record)
 │       ├── main/resources/
-│       │   └── application.properties      (apunta a ../frontend y ../base-de-datos)
+│       │   └── application.properties      (BD H2 y consola; sin rutas a otras carpetas)
 │       └── test/java/pe/edu/ulima/tiendacapas/
 │           └── negocio/VentaServiceTest.java
 │
@@ -74,7 +80,8 @@ actividad-4puntos-arquitectura-capas/
 └── specs/                             (SDD: steering, arquitectura, spec 01, guion)
 ```
 
-- El backend **sirve** la carpeta `frontend/` y **ejecuta** los scripts de `base-de-datos/` al arrancar, así todo corre con un solo comando (ver `tecnologia.md`).
+- Al compilar, el `pom.xml` copia `frontend/` y `schema.sql`/`data.sql` **dentro** del backend (ver `tecnologia.md`). Por eso la app arranca igual desde cualquier carpeta, el `.jar` es un solo desplegable y todo corre con un solo comando.
+- **Tres carpetas no son tres tiers.** Separan el código por pieza para repartir el trabajo, pero en ejecución todo corre en **un solo proceso** (la BD H2 vive en memoria dentro de la misma JVM). La separación que se demuestra es **lógica**.
 - Las consultas que usa la aplicación (`SELECT`, `INSERT`, `UPDATE`) viven en `backend/.../datos/`, no en `base-de-datos/` (AR-04). `consultas.sql` es solo para mostrar en el video.
 
 ## Convenciones

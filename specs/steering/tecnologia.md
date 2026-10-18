@@ -14,9 +14,50 @@
 ### Generar el proyecto en start.spring.io
 
 - Project: Maven · Language: Java · Java: 21 · Packaging: Jar
-- Generar dentro de la carpeta `backend/`.
-- Group: `pe.edu.ulima` · Artifact: `tiendacapas` · Package: `pe.edu.ulima.tiendacapas`
+- Group: `pe.edu.ulima` · Artifact: `tiendacapas` · **Name: `TiendaCapas`** · Package: `pe.edu.ulima.tiendacapas`
 - Dependencies: **Spring Web**, **JDBC API**, **H2 Database**.
+
+> **Name tiene que ser `TiendaCapas`.** Si se deja el valor por defecto, el generador crea la clase `TiendacapasApplication` (con «c» minúscula). En Windows ese archivo choca con el `TiendaCapasApplication.java` que ya existe en el repo (el sistema no distingue mayúsculas) y el proyecto no compila.
+
+#### Colocar el proyecto generado en `backend/`
+
+1. El zip trae una carpeta `tiendacapas/`. Copiar **su contenido** (no la carpeta) dentro de `backend/`.
+2. Aceptar que reemplace los archivos vacíos que ya existen (`TiendaCapasApplication.java`, `application.properties`).
+3. Borrar `src/test/.../TiendaCapasApplicationTests.java` y `HELP.md` (no están en el diseño). Conservar `.gitignore`, `mvnw`, `mvnw.cmd`, `.mvn/` y `pom.xml`.
+4. Agregar al `pom.xml` el bloque `<resources>` de la sección siguiente.
+
+#### `pom.xml`: empaquetar `frontend/` y `base-de-datos/` dentro del backend
+
+Dentro de `<build>`, junto a `<plugins>`:
+
+```xml
+<resources>
+    <resource>
+        <directory>src/main/resources</directory>
+    </resource>
+    <resource>
+        <directory>../frontend</directory>
+        <targetPath>static</targetPath>
+        <excludes>
+            <exclude>README.md</exclude>
+        </excludes>
+    </resource>
+    <resource>
+        <directory>../base-de-datos</directory>
+        <includes>
+            <include>schema.sql</include>
+            <include>data.sql</include>
+        </includes>
+    </resource>
+</resources>
+```
+
+Al compilar, Maven copia `frontend/` a `static/` y `schema.sql` y `data.sql` a la raíz del classpath. Spring Boot los encuentra ahí por defecto: sirve la página en `/` y ejecuta los scripts al arrancar. Así:
+
+- La app funciona igual si se arranca desde la terminal, desde el IDE o con `java -jar`, sin importar la carpeta de trabajo.
+- El `.jar` es **un solo desplegable** que ya lleva dentro el frontend y los scripts.
+- `consultas.sql` y los `README.md` **no** se empaquetan (son solo para el equipo).
+- Si se cambia algo en `frontend/` o `base-de-datos/`, hay que **reiniciar la app** para que Maven vuelva a copiarlo.
 
 ## Por qué este stack (para la PPT y el video)
 
@@ -47,12 +88,9 @@ spring.datasource.url=jdbc:h2:mem:tienda;DB_CLOSE_DELAY=-1
 spring.datasource.username=sa
 spring.datasource.password=
 spring.sql.init.mode=always
-spring.sql.init.schema-locations=file:../base-de-datos/schema.sql
-spring.sql.init.data-locations=file:../base-de-datos/data.sql
-spring.web.resources.static-locations=file:../frontend/
 spring.h2.console.enabled=true
 ```
 
-> Las rutas `../frontend` y `../base-de-datos` son relativas a `backend/`: la app se arranca siempre desde esa carpeta.
+No hacen falta rutas a `../frontend` ni a `../base-de-datos`: el `pom.xml` ya los pone en el classpath (ver arriba).
 
 > Si la versión de Spring Boot no habilita la consola H2 solo con esa propiedad, agregar la dependencia que indique la documentación de esa versión. El diseño no cambia.

@@ -9,7 +9,7 @@ Proyecto Maven. Paquete base `pe.edu.ulima.tiendacapas`; un paquete por capa:
 | `datos` | Datos (SQL con `JdbcTemplate`) | `ProductoRepository`, `VentaRepository` |
 | `modelo` | Compartido entre capas | `Producto`, `Venta` |
 
-Al generar el proyecto en start.spring.io (tarea T1), descomprimirlo **dentro de esta carpeta** conservando los archivos ya creados (`pom.xml`, `mvnw` y `.mvn/` vienen del generador).
+Al generar el proyecto en start.spring.io (tarea T1), usar **Name `TiendaCapas`**, copiar aquí el **contenido** de la carpeta `tiendacapas/` del zip (reemplazando los archivos vacíos) y agregar al `pom.xml` el bloque `<resources>` que empaqueta `../frontend` y `../base-de-datos`. Los pasos exactos están en `specs/steering/tecnologia.md`.
 
 Se ejecuta desde esta carpeta:
 

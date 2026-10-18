@@ -11,7 +11,7 @@ CREATE TABLE producto (
     id      BIGINT AUTO_INCREMENT PRIMARY KEY,
     nombre  VARCHAR(80)   NOT NULL,
     precio  DECIMAL(10,2) NOT NULL,
-    stock   INT           NOT NULL
+    stock   INT           NOT NULL CHECK (stock >= 0)
 );
 
 CREATE TABLE venta (
@@ -61,7 +61,9 @@ public record Venta(Long id, Long productoId, String producto, String cliente,
 |---|---|
 | `List<Producto> listar()` | `SELECT id, nombre, precio, stock FROM producto ORDER BY id` |
 | `Optional<Producto> buscarPorId(Long id)` | `SELECT id, nombre, precio, stock FROM producto WHERE id = ?` |
-| `void descontarStock(Long id, int cantidad)` | `UPDATE producto SET stock = stock - ? WHERE id = ?` |
+| `boolean descontarStock(Long id, int cantidad)` | `UPDATE producto SET stock = stock - ? WHERE id = ? AND stock >= ?`; devuelve `true` si actualizó 1 fila y `false` si no había stock suficiente |
+
+El `AND stock >= ?` hace que la comprobación y el descuento sean **una sola operación** en la BD: si dos ventas llegan a la vez, solo descuenta la que alcanza. El `CHECK (stock >= 0)` de la tabla es una segunda barrera. El repositorio **no decide** qué hacer si no alcanza; solo lo informa con el `boolean`.
 
 `VentaRepository` (`@Repository`)
 
@@ -87,11 +89,11 @@ Cada método escribe `log.info("[DATOS] ...")` con la sentencia que ejecuta.
 Pasos de `registrarVenta`:
 
 1. `log.info("[NEGOCIO] registrarVenta ...")`.
-2. RN-01: si `cantidad == null || cantidad < 1` → `VentaException("La cantidad debe ser al menos 1")`; si `cliente` es nulo o en blanco → `VentaException("Ingresa el nombre del cliente")`.
+2. RN-01: si `cantidad == null || cantidad < 1` → `VentaException("La cantidad debe ser al menos 1")`; si `cliente` es nulo o en blanco → `VentaException("Ingresa el nombre del cliente")`; si `cliente.trim().length() > 80` → `VentaException("El nombre del cliente no puede superar 80 caracteres")`.
 3. `buscarPorId(productoId)`; si no existe → `VentaException("El producto no existe")`.
 4. RN-02: si `cantidad > producto.stock()` → `VentaException("Stock insuficiente: disponible " + stock)`.
 5. RN-03: `total = producto.precio().multiply(BigDecimal.valueOf(cantidad)).setScale(2, RoundingMode.HALF_UP)`.
-6. `descontarStock(productoId, cantidad)`.
+6. Si `descontarStock(productoId, cantidad)` devuelve `false` (otra venta se llevó el stock entre el paso 4 y este), volver a leer el producto y lanzar `VentaException("Stock insuficiente: disponible " + stockActual)` (RN-02, VEN-3.7).
 7. `guardar(new Venta(null, productoId, producto.nombre(), cliente.trim(), cantidad, total, LocalDateTime.now()))` y devolver el resultado.
 
 ## Capa de Presentación
@@ -113,7 +115,7 @@ Cada endpoint escribe `log.info("[PRESENTACIÓN] ...")`. El controlador **no val
 
 ### Frontend: `frontend/`
 
-`index.html`: título "TiendaCapas · Registrar venta", formulario (select `producto`, input numérico `cantidad`, input texto `cliente`, botón "Registrar venta"), un `<p id="mensaje">` y una tabla de ventas.
+`index.html`: título "TiendaCapas · Registrar venta", formulario (select `producto`, input numérico `cantidad`, input texto `cliente` con `maxlength="80"`, botón "Registrar venta"), un `<p id="mensaje">` y una tabla de ventas.
 
 `app.js`:
 
@@ -135,3 +137,4 @@ Cada endpoint escribe `log.info("[PRESENTACIÓN] ...")`. El controlador **no val
 | `registraVentaYDescuentaStock` | Vender 3 "Mouse" → total 75.00 y stock pasa de 10 a 7 (VEN-2, RN-02, RN-03) |
 | `rechazaStockInsuficiente` | Vender 3 "Monitor 24\"" (stock 2) → `VentaException` "Stock insuficiente: disponible 2" y stock sigue en 2 (VEN-3.3, VEN-3.5) |
 | `rechazaCantidadCero` | Cantidad 0 → `VentaException` "La cantidad debe ser al menos 1" (VEN-3.1) |
+| `rechazaClienteMuyLargo` | Cliente de 81 caracteres → `VentaException` "El nombre del cliente no puede superar 80 caracteres" (VEN-3.6) |

@@ -67,3 +67,26 @@ docker compose up -d
 - Volver a los datos semilla: `docker compose down -v` y `docker compose up -d` desde `base-de-datos/`.
 - Pruebas (no necesitan Docker): `./mvnw test` desde `backend/`.
 - En Windows (PowerShell) usar `.\mvnw.cmd` en lugar de `./mvnw`.
+- Después de un `git pull`, compilar con `clean` (`./mvnw clean test`, `./mvnw clean spring-boot:run`): así no quedan en `target/` archivos de una versión anterior (por ejemplo, un `schema.sql` viejo hace fallar las pruebas).
+
+### Si el puerto 5432 ya está ocupado
+
+Pasa cuando la PC ya tiene un PostgreSQL instalado: el contenedor no puede publicar el 5432 (o el backend termina conectándose al PostgreSQL local y falla el usuario `tienda`). Se usa otro puerto, por ejemplo 5433, y se le avisa al backend con `DB_URL`.
+
+Windows (PowerShell):
+
+```powershell
+cd base-de-datos
+$env:DB_PUERTO="5433"; docker compose up -d
+cd ..\backend
+$env:DB_URL="jdbc:postgresql://localhost:5433/tienda"; .\mvnw.cmd spring-boot:run
+```
+
+Linux / macOS / Git Bash:
+
+```bash
+cd base-de-datos && DB_PUERTO=5433 docker compose up -d
+cd ../backend && DB_URL=jdbc:postgresql://localhost:5433/tienda ./mvnw spring-boot:run
+```
+
+Para no escribirlo cada vez, se puede crear `base-de-datos/.env` con la línea `DB_PUERTO=5433` (lo lee `docker compose`; no se sube al repo).

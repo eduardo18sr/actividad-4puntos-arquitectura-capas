@@ -8,10 +8,10 @@ Variante: **arquitectura en 3 capas clásica** (presentación, negocio, datos) m
 
 | Capa | Dónde | Responsabilidad | Puede usar |
 |---|---|---|---|
-| **Presentación** | `static/index.html`, `static/app.js` (frontend) y paquete `presentacion` (controlador REST) | Mostrar la pantalla, recibir la petición HTTP, devolver JSON y mensajes de error. **Sin reglas de negocio ni SQL.** | `negocio` |
+| **Presentación** | carpeta `frontend/` (HTML/JS) y paquete `presentacion` del backend (controlador REST) | Mostrar la pantalla, recibir la petición HTTP, devolver JSON y mensajes de error. **Sin reglas de negocio ni SQL.** | `negocio` |
 | **Negocio** | paquete `negocio` | Aplicar RN-01 a RN-03, calcular el total y coordinar la transacción. **Sin HTTP ni SQL.** | `datos` |
 | **Datos** | paquete `datos` | Ejecutar el SQL (`SELECT`, `INSERT`, `UPDATE`) y convertir filas en objetos. **Sin reglas de negocio.** | Base de datos (JDBC) |
-| **Base de datos** | H2 (`schema.sql`, `data.sql`) | Guardar productos y ventas. | — |
+| **Base de datos** | H2 · carpeta `base-de-datos/` (`schema.sql`, `data.sql`) | Guardar productos y ventas. | — |
 | *Modelo (compartido)* | paquete `modelo` | Objetos simples (`Producto`, `Venta`) que viajan entre capas. Sin lógica. | — |
 
 ### Reglas de dependencia
@@ -35,34 +35,47 @@ Se verifican en la revisión de código y se explican en el video abriendo los `
 
 ## Árbol de archivos
 
-```
-src/main/java/pe/edu/ulima/tiendacapas/
-├── TiendaCapasApplication.java
-├── presentacion/
-│   ├── VentaController.java        (@RestController: /api/productos, /api/ventas)
-│   └── VentaRequest.java           (record: datos que llegan del formulario)
-├── negocio/
-│   ├── VentaService.java           (@Service: reglas RN-01..RN-03, @Transactional)
-│   └── VentaException.java         (error de regla de negocio con mensaje para el usuario)
-├── datos/
-│   ├── ProductoRepository.java     (@Repository: SQL de la tabla producto)
-│   └── VentaRepository.java        (@Repository: SQL de la tabla venta)
-└── modelo/
-    ├── Producto.java               (record)
-    └── Venta.java                  (record)
+El repositorio se divide en tres carpetas, una por pieza del sistema:
 
-src/main/resources/
-├── application.properties
-├── schema.sql
-├── data.sql
-└── static/
-    ├── index.html
-    ├── app.js
-    └── estilos.css
-
-src/test/java/pe/edu/ulima/tiendacapas/
-└── negocio/VentaServiceTest.java
 ```
+actividad-4puntos-arquitectura-capas/
+├── frontend/                          ← CAPA DE PRESENTACIÓN (cliente)
+│   ├── index.html                     (formulario + tabla de ventas)
+│   ├── app.js                         (fetch a /api/...)
+│   └── estilos.css
+│
+├── backend/                           ← Spring Boot (proyecto Maven)
+│   ├── pom.xml, mvnw, .mvn/           (los genera start.spring.io en T1)
+│   └── src/
+│       ├── main/java/pe/edu/ulima/tiendacapas/
+│       │   ├── TiendaCapasApplication.java
+│       │   ├── presentacion/          ← CAPA DE PRESENTACIÓN (servidor)
+│       │   │   ├── VentaController.java    (@RestController: /api/productos, /api/ventas)
+│       │   │   └── VentaRequest.java       (record: datos que llegan del formulario)
+│       │   ├── negocio/               ← CAPA DE NEGOCIO
+│       │   │   ├── VentaService.java       (@Service: reglas RN-01..RN-03, @Transactional)
+│       │   │   └── VentaException.java     (error de regla con mensaje para el usuario)
+│       │   ├── datos/                 ← CAPA DE DATOS
+│       │   │   ├── ProductoRepository.java (@Repository: SQL de la tabla producto)
+│       │   │   └── VentaRepository.java    (@Repository: SQL de la tabla venta)
+│       │   └── modelo/                ← compartido entre capas
+│       │       ├── Producto.java           (record)
+│       │       └── Venta.java              (record)
+│       ├── main/resources/
+│       │   └── application.properties      (apunta a ../frontend y ../base-de-datos)
+│       └── test/java/pe/edu/ulima/tiendacapas/
+│           └── negocio/VentaServiceTest.java
+│
+├── base-de-datos/                     ← BASE DE DATOS (H2)
+│   ├── schema.sql                     (CREATE TABLE producto, venta)
+│   ├── data.sql                       (productos semilla)
+│   └── consultas.sql                  (consultas para la demo en /h2-console)
+│
+└── specs/                             (SDD: steering, arquitectura, spec 01, guion)
+```
+
+- El backend **sirve** la carpeta `frontend/` y **ejecuta** los scripts de `base-de-datos/` al arrancar, así todo corre con un solo comando (ver `tecnologia.md`).
+- Las consultas que usa la aplicación (`SELECT`, `INSERT`, `UPDATE`) viven en `backend/.../datos/`, no en `base-de-datos/` (AR-04). `consultas.sql` es solo para mostrar en el video.
 
 ## Convenciones
 

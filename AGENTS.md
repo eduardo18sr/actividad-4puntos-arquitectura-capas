@@ -16,7 +16,7 @@ Este repositorio sigue **desarrollo guiado por especificaciones (SDD)**: primero
 - Si un nombre de clase o ruta cambia respecto al diseño, actualizar `design.md`, `estructura.md` y `arquitectura.md` en el mismo commit: los diagramas deben coincidir con lo que se muestra en el video.
 - Código y mensajes en español; dinero con `BigDecimal`; inyección por constructor.
 
-## Comandos
+## Comandos (desde `backend/`)
 
 ```bash
 ./mvnw spring-boot:run

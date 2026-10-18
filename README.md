@@ -35,6 +35,9 @@ Primero se especifica, luego se codea. Una sola spec.
 | Ruta | Contenido |
 |---|---|
 | `AGENTS.md` / `CLAUDE.md` | Reglas para quien implemente (persona o agente de IA) |
+| `frontend/` | Capa de presentación (cliente): `index.html`, `app.js`, `estilos.css` |
+| `backend/` | Spring Boot: paquetes `presentacion`, `negocio`, `datos`, `modelo` |
+| `base-de-datos/` | Scripts H2: `schema.sql`, `data.sql`, `consultas.sql` |
 | `specs/steering/producto.md` | Qué hace el sistema, alcance y reglas de negocio RN-01 a RN-03 |
 | `specs/steering/tecnologia.md` | Stack, justificación y comandos |
 | `specs/steering/estructura.md` | Las capas, reglas de dependencia y árbol de archivos |
@@ -44,10 +47,12 @@ Primero se especifica, luego se codea. Una sola spec.
 
 ## Comandos (cuando exista el código)
 
+Desde la carpeta `backend/`:
+
 ```bash
 ./mvnw spring-boot:run
 ```
 
 App en `http://localhost:8080` · consola de BD en `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:mem:tienda`, usuario `sa`, sin contraseña).
 
-En Windows (PowerShell) usar `.\mvnw.cmd spring-boot:run`.
+En Windows (PowerShell) usar `cd backend` y luego `.\mvnw.cmd spring-boot:run`.

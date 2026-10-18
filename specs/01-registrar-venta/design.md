@@ -1,10 +1,10 @@
 # Spec 01 · Registrar venta — Diseño
 
-Diseño por capa. Paquete base: `pe.edu.ulima.tiendacapas`.
+Diseño por capa. Carpetas: `frontend/`, `backend/` (paquete base `pe.edu.ulima.tiendacapas`) y `base-de-datos/` (ver `estructura.md`).
 
-## Base de datos
+## Base de datos (`base-de-datos/`)
 
-`schema.sql`
+`base-de-datos/schema.sql`
 
 ```sql
 CREATE TABLE producto (
@@ -24,12 +24,22 @@ CREATE TABLE venta (
 );
 ```
 
-`data.sql`
+`base-de-datos/data.sql`
 
 ```sql
 INSERT INTO producto (nombre, precio, stock) VALUES ('Mouse', 25.00, 10);
 INSERT INTO producto (nombre, precio, stock) VALUES ('Teclado', 80.00, 5);
 INSERT INTO producto (nombre, precio, stock) VALUES ('Monitor 24"', 450.00, 2);
+```
+
+`base-de-datos/consultas.sql` (solo para la demo en `/h2-console`)
+
+```sql
+SELECT * FROM producto ORDER BY id;
+SELECT * FROM venta ORDER BY id DESC;
+SELECT v.id, p.nombre, v.cliente, v.cantidad, v.total, v.fecha
+FROM venta v JOIN producto p ON p.id = v.producto_id
+ORDER BY v.id DESC;
 ```
 
 ## Modelo (compartido)
@@ -101,7 +111,7 @@ Pasos de `registrarVenta`:
 
 Cada endpoint escribe `log.info("[PRESENTACIÓN] ...")`. El controlador **no valida reglas**: todo pasa al servicio.
 
-### Frontend: `static/`
+### Frontend: `frontend/`
 
 `index.html`: título "TiendaCapas · Registrar venta", formulario (select `producto`, input numérico `cantidad`, input texto `cliente`, botón "Registrar venta"), un `<p id="mensaje">` y una tabla de ventas.
 

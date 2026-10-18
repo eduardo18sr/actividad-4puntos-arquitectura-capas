@@ -1,11 +1,20 @@
-# base-de-datos · H2
+# base-de-datos · PostgreSQL en Docker
 
-Scripts SQL de la base de datos. El backend los ejecuta al arrancar (ver `specs/steering/tecnologia.md`), así la BD se recrea igual en cada demo.
+La base de datos corre en un contenedor PostgreSQL. Al crearse por primera vez ejecuta `schema.sql` y `data.sql` (ver `specs/steering/tecnologia.md`).
 
-| Archivo | Qué contendrá | Lo usa |
+```bash
+docker compose up -d      # levantar (desde esta carpeta)
+docker compose stop       # detener conservando los datos
+docker compose down -v    # borrar todo; al volver a levantar se recrean tablas y semilla
+```
+
+Consola: `docker exec -it tiendacapas-db psql -U tienda -d tienda`
+
+| Archivo | Qué contiene | Lo usa |
 |---|---|---|
-| `schema.sql` | `CREATE TABLE producto` y `CREATE TABLE venta` | Backend al arrancar |
-| `data.sql` | Productos semilla (Mouse, Teclado, Monitor 24") | Backend al arrancar |
-| `consultas.sql` | Consultas para mostrar en la demo desde `/h2-console` | Equipo, a mano |
+| `docker-compose.yml` | Contenedor `tiendacapas-db` (PostgreSQL 17, puerto 5432, volumen `datos-tienda`) | `docker compose` |
+| `schema.sql` | `CREATE TABLE producto` y `CREATE TABLE venta` | Contenedor al crearse; pruebas del backend (H2) |
+| `data.sql` | Productos semilla (Mouse, Teclado, Monitor 24") | Contenedor al crearse; pruebas del backend (H2) |
+| `consultas.sql` | Consultas para mostrar en la demo desde `psql` | Equipo, a mano |
 
 Las consultas que usa la aplicación (`SELECT`, `INSERT`, `UPDATE`) **no** están aquí: viven en la capa de datos del backend (`ProductoRepository`, `VentaRepository`), según AR-04.

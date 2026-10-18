@@ -1,0 +1,30 @@
+# BASE DE DATOS · PostgreSQL en un contenedor.
+# Levantar:            docker compose up -d        (desde esta carpeta)
+# Detener (conserva):  docker compose stop
+# Reiniciar de cero:   docker compose down -v      (borra los datos; al volver a levantar se recrean tablas y semilla)
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: tiendacapas-db
+    environment:
+      POSTGRES_DB: tienda
+      POSTGRES_USER: tienda
+      POSTGRES_PASSWORD: tienda
+      TZ: America/Lima
+      PGTZ: America/Lima
+    ports:
+      - "5432:5432"
+    volumes:
+      - datos-tienda:/var/lib/postgresql/data
+      # Solo se ejecutan cuando el volumen está vacío, en orden alfabético: primero tablas, luego semilla.
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tienda -d tienda"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  datos-tienda:

@@ -1,4 +1,5 @@
--- BASE DE DATOS · Productos semilla. Se recrean en cada arranque (BD en memoria).
+-- BASE DE DATOS · Productos semilla. El contenedor los inserta al crearse
+-- (para volver a este estado: docker compose down -v && docker compose up -d).
 
 INSERT INTO producto (nombre, precio, stock) VALUES ('Mouse', 25.00, 10);
 INSERT INTO producto (nombre, precio, stock) VALUES ('Teclado', 80.00, 5);

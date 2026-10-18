@@ -25,7 +25,7 @@ flowchart TB
         D["Capa de Datos<br/>ProductoRepository · VentaRepository<br/>SQL con JdbcTemplate"]
         M[("modelo<br/>Producto · Venta")]
     end
-    DB[("Base de datos H2<br/>producto · venta")]
+    DB[("PostgreSQL 17<br/>contenedor Docker tiendacapas-db<br/>producto · venta")]
 
     UI -- "HTTP / JSON" --> P
     P --> N
@@ -42,7 +42,7 @@ flowchart TB
 | `VentaController` | Spring Web (`@RestController`) | Recibir JSON, llamar al servicio, devolver respuesta o error 400 |
 | `VentaService` | Spring (`@Service`, `@Transactional`) | Validar RN-01/RN-02, calcular total (RN-03), descontar stock y guardar |
 | `ProductoRepository`, `VentaRepository` | Spring JDBC (`JdbcTemplate`) | `SELECT`, `INSERT`, `UPDATE` |
-| H2 | Base de datos en memoria | Tablas `producto` y `venta` |
+| PostgreSQL | Contenedor Docker (`base-de-datos/docker-compose.yml`) | Tablas `producto` y `venta`; datos persistentes en un volumen |
 
 ## 3. Recorrido de "Registrar venta" (secuencia)
 
@@ -54,7 +54,7 @@ sequenceDiagram
     participant S as VentaService (Negocio)
     participant PR as ProductoRepository (Datos)
     participant VR as VentaRepository (Datos)
-    participant DB as H2
+    participant DB as PostgreSQL
 
     U->>F: Elige producto, cantidad, cliente y pulsa "Registrar venta"
     F->>C: POST /api/ventas {productoId, cliente, cantidad}
@@ -82,7 +82,7 @@ Si una regla falla, `VentaService` lanza `VentaException`; el controlador la con
 | Separación por responsabilidad | El controlador no tiene reglas de negocio; el servicio no tiene SQL ni HTTP; el repositorio no tiene reglas. |
 | Capas cerradas, dependencia hacia abajo | `VentaController` importa solo de la capa de negocio (`VentaService`, `VentaException`) y de `modelo`, nunca un repositorio; `VentaService` importa los repositorios y `modelo`, nunca nada de `presentacion`; los repositorios importan solo `JdbcTemplate` y `modelo` (mostrar los `import` en el video; detalle en `estructura.md`). |
 | Cada capa ofrece una interfaz a la superior | Controlador → endpoints HTTP; servicio → `registrarVenta(...)`; repositorio → `buscarPorId`, `descontarStock`, `guardar`. |
-| Cambios localizados | Cambiar H2 por PostgreSQL solo toca `application.properties` (y quizá el SQL de `datos`). Cambiar el frontend no toca negocio ni datos. |
+| Cambios localizados | Se pasó de H2 a PostgreSQL cambiando solo `application.properties`, el `pom.xml` y `schema.sql`: **ni una línea** de presentación, negocio o datos (Java) cambió. Cambiar el frontend no toca negocio ni datos. |
 | Recorrido visible | La consola muestra `[PRESENTACIÓN] → [NEGOCIO] → [DATOS]` en cada venta. |
 
 ## 5. Trade-offs (para conclusiones)
@@ -90,4 +90,4 @@ Si una regla falla, `VentaService` lanza `VentaException`; el controlador la con
 - **A favor**: fácil de entender, de repartir entre integrantes y de probar por capa; los cambios quedan localizados.
 - **En contra**: algunas llamadas solo "pasan" por una capa (p. ej. listar ventas); todo se despliega junto, así que no se puede escalar una capa por separado (eso ya sería multi-tier o microservicios).
 - **Frente a MVC**: MVC organiza la interfaz; las capas organizan todo el sistema. Se complementan.
-- **Frente a Multi-Tier**: aquí las capas son lógicas dentro de un solo proceso; si la BD o el frontend se desplegaran en servidores separados, se estaría hablando de la vista física (tiers).
+- **Frente a Multi-Tier**: las capas (presentación, negocio, datos) son lógicas y corren en un solo proceso. Que la BD esté en su propio contenedor es una decisión de **despliegue** (vista física); el estilo que se demuestra es la separación lógica en capas cerradas.

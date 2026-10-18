@@ -1,5 +1,5 @@
--- Consultas para la demo en http://localhost:8080/h2-console
--- (JDBC URL jdbc:h2:mem:tienda · usuario sa · sin contraseña).
+-- Consultas para la demo. Abrir la consola de PostgreSQL del contenedor:
+--   docker exec -it tiendacapas-db psql -U tienda -d tienda
 -- La aplicación NO usa este archivo: su SQL vive en la capa de datos del backend.
 
 -- Productos y su stock actual

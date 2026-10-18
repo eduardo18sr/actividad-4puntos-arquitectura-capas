@@ -2,24 +2,26 @@
 
 Diseño por capa. Carpetas: `frontend/`, `backend/` (paquete base `pe.edu.ulima.tiendacapas`) y `base-de-datos/` (ver `estructura.md`).
 
-## Base de datos (`base-de-datos/`)
+## Base de datos (`base-de-datos/`, PostgreSQL en Docker)
+
+`docker-compose.yml` levanta el contenedor `tiendacapas-db` (`postgres:17-alpine`, puerto 5432, base/usuario/clave `tienda`) y, al crearse por primera vez, ejecuta `schema.sql` y luego `data.sql`. Detalle en `specs/steering/tecnologia.md`.
 
 `base-de-datos/schema.sql`
 
 ```sql
 CREATE TABLE producto (
-    id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre  VARCHAR(80)   NOT NULL,
-    precio  DECIMAL(10,2) NOT NULL,
+    precio  NUMERIC(10,2) NOT NULL,
     stock   INT           NOT NULL CHECK (stock >= 0)
 );
 
 CREATE TABLE venta (
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     producto_id BIGINT        NOT NULL REFERENCES producto(id),
     cliente     VARCHAR(80)   NOT NULL,
     cantidad    INT           NOT NULL,
-    total       DECIMAL(10,2) NOT NULL,
+    total       NUMERIC(10,2) NOT NULL,
     fecha       TIMESTAMP     NOT NULL
 );
 ```
@@ -32,7 +34,7 @@ INSERT INTO producto (nombre, precio, stock) VALUES ('Teclado', 80.00, 5);
 INSERT INTO producto (nombre, precio, stock) VALUES ('Monitor 24"', 450.00, 2);
 ```
 
-`base-de-datos/consultas.sql` (solo para la demo en `/h2-console`)
+`base-de-datos/consultas.sql` (solo para la demo con `docker exec -it tiendacapas-db psql -U tienda -d tienda`)
 
 ```sql
 SELECT * FROM producto ORDER BY id;
@@ -133,7 +135,7 @@ Cada endpoint escribe `log.info("[PRESENTACIÓN] ...")`. El controlador **no val
 
 ## Pruebas
 
-`VentaServiceTest` (`@SpringBootTest`, usa la BD H2 con los datos semilla; `@Transactional` en la clase para que cada prueba revierta sus cambios)
+`VentaServiceTest` (`@SpringBootTest`, usa una BD H2 en memoria en modo PostgreSQL creada con los mismos `schema.sql` y `data.sql`, así no necesita Docker; `@Transactional` en la clase para que cada prueba revierta sus cambios)
 
 | Prueba | Verifica |
 |---|---|

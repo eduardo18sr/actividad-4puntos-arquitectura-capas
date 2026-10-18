@@ -32,10 +32,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-h2console</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 		<dependency>
@@ -43,10 +39,17 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
+		<!-- Base de datos de la app: PostgreSQL en Docker (base-de-datos/docker-compose.yml) -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- Solo para las pruebas: H2 en memoria en modo PostgreSQL, así ./mvnw test no necesita Docker -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -61,7 +64,7 @@
 	</dependencies>
 
 	<build>
-		<!-- Empaqueta ../frontend y los scripts de ../base-de-datos dentro del backend (ver specs/steering/tecnologia.md) -->
+		<!-- Empaqueta ../frontend dentro del backend: se sirve en / (ver specs/steering/tecnologia.md) -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -73,14 +76,20 @@
 					<exclude>README.md</exclude>
 				</excludes>
 			</resource>
-			<resource>
+		</resources>
+		<!-- Las pruebas crean la BD H2 con los mismos scripts que usa el contenedor PostgreSQL -->
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+			<testResource>
 				<directory>../base-de-datos</directory>
 				<includes>
 					<include>schema.sql</include>
 					<include>data.sql</include>
 				</includes>
-			</resource>
-		</resources>
+			</testResource>
+		</testResources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

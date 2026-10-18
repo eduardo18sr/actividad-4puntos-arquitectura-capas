@@ -16,7 +16,7 @@ Es deliberadamente pequeño: el objetivo es que **las capas se noten**, no const
 |---|---|---|
 | 1 | Caso práctico acotado | Registrar una venta |
 | 2 | Diagrama de la arquitectura realmente implementada | `specs/arquitectura/arquitectura.md`, alineado 1:1 con las clases |
-| 3 | Aplicación funcional con tecnología justificada | Java 21 + Spring Boot + H2 (ver `tecnologia.md`) |
+| 3 | Aplicación funcional con tecnología justificada | Java 21 + Spring Boot + PostgreSQL en Docker (ver `tecnologia.md`) |
 | 4 | Ejecución en vivo explicando el recorrido | Registrar una venta y seguir la petición por las capas (log en consola con el nombre de cada capa) |
 | 5 | Explicar por qué es Arquitectura en Capas | Cada capa en su paquete, con una responsabilidad y llamando solo a la de abajo (ver `arquitectura.md`, sección 4) |
 
@@ -30,7 +30,7 @@ Es deliberadamente pequeño: el objetivo es que **las capas se noten**, no const
 
 **Dentro**: listar productos en un desplegable, registrar una venta, listar ventas registradas.
 
-**Fuera (no construir)**: login, carrito, varios productos por venta, IGV/descuentos, pagos, editar o anular ventas, CRUD de productos (vienen de datos semilla), Docker, nube, pruebas de arquitectura automáticas, diseño visual elaborado.
+**Fuera (no construir)**: login, carrito, varios productos por venta, IGV/descuentos, pagos, editar o anular ventas, CRUD de productos (vienen de datos semilla), contenedores para el backend o el frontend (Docker solo se usa para la BD), nube, pruebas de arquitectura automáticas, diseño visual elaborado.
 
 ## Reglas de negocio (viven en la capa de negocio)
 

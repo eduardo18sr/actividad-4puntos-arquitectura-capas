@@ -11,7 +11,7 @@ Variante: **arquitectura en 3 capas clásica** (presentación, negocio, datos) m
 | **Presentación** | carpeta `frontend/` (HTML/JS) y paquete `presentacion` del backend (controlador REST) | Mostrar la pantalla, recibir la petición HTTP, devolver JSON y mensajes de error. **Sin reglas de negocio ni SQL.** | `negocio` |
 | **Negocio** | paquete `negocio` | Aplicar RN-01 a RN-03, calcular el total y coordinar la transacción. **Sin HTTP ni SQL.** | `datos` |
 | **Datos** | paquete `datos` | Ejecutar el SQL (`SELECT`, `INSERT`, `UPDATE`) y convertir filas en objetos. **Sin reglas de negocio.** | Base de datos (JDBC) |
-| **Base de datos** | H2 · carpeta `base-de-datos/` (`schema.sql`, `data.sql`) | Guardar productos y ventas. | — |
+| **Base de datos** | PostgreSQL en Docker · carpeta `base-de-datos/` (`docker-compose.yml`, `schema.sql`, `data.sql`) | Guardar productos y ventas. | — |
 | *Modelo (compartido)* | paquete `modelo` | Objetos simples (`Producto`, `Venta`) que viajan entre capas. Sin lógica. | — |
 
 ### Reglas de dependencia
@@ -34,7 +34,7 @@ Se verifican en la revisión de código y se explican en el video abriendo los `
 | `ProductoRepository`, `VentaRepository` | `JdbcTemplate`, `modelo` | Nada de `negocio` ni de `presentacion` |
 
 ```
- index.html / app.js ──HTTP──► presentacion ──► negocio ──► datos ──JDBC──► H2
+ index.html / app.js ──HTTP──► presentacion ──► negocio ──► datos ──JDBC──► PostgreSQL (Docker)
                                     │              │          │
                                     └──────────────┴──────────┴──► modelo (compartido)
 ```
@@ -68,20 +68,24 @@ actividad-4puntos-arquitectura-capas/
 │       │       ├── Producto.java           (record)
 │       │       └── Venta.java              (record)
 │       ├── main/resources/
-│       │   └── application.properties      (BD H2 y consola; sin rutas a otras carpetas)
-│       └── test/java/pe/edu/ulima/tiendacapas/
-│           └── negocio/VentaServiceTest.java
+│       │   └── application.properties      (conexión a PostgreSQL; sin rutas a otras carpetas)
+│       ├── test/java/pe/edu/ulima/tiendacapas/
+│       │   └── negocio/VentaServiceTest.java
+│       └── test/resources/
+│           └── application.properties      (solo pruebas: H2 en modo PostgreSQL)
 │
-├── base-de-datos/                     ← BASE DE DATOS (H2)
+├── base-de-datos/                     ← BASE DE DATOS (PostgreSQL en Docker)
+│   ├── docker-compose.yml             (contenedor tiendacapas-db)
 │   ├── schema.sql                     (CREATE TABLE producto, venta)
 │   ├── data.sql                       (productos semilla)
-│   └── consultas.sql                  (consultas para la demo en /h2-console)
+│   └── consultas.sql                  (consultas para la demo con psql)
 │
 └── specs/                             (SDD: steering, arquitectura, spec 01, guion)
 ```
 
-- Al compilar, el `pom.xml` copia `frontend/` y `schema.sql`/`data.sql` **dentro** del backend (ver `tecnologia.md`). Por eso la app arranca igual desde cualquier carpeta, el `.jar` es un solo desplegable y todo corre con un solo comando.
-- **Tres carpetas no son tres tiers.** Separan el código por pieza para repartir el trabajo, pero en ejecución todo corre en **un solo proceso** (la BD H2 vive en memoria dentro de la misma JVM). La separación que se demuestra es **lógica**.
+- Al compilar, el `pom.xml` copia `frontend/` **dentro** del backend (ver `tecnologia.md`). Por eso la app arranca igual desde cualquier carpeta y el `.jar` lleva dentro la página.
+- La BD la crea el contenedor con `schema.sql` y `data.sql`. Las pruebas reutilizan esos mismos scripts sobre H2.
+- **Capas lógicas y despliegue.** Las capas presentación, negocio y datos corren en **un solo proceso** (el backend, que además sirve el frontend). La base de datos corre aparte, en su **contenedor PostgreSQL**. Eso es despliegue (dónde corre cada pieza), no cambia las capas: el backend solo la conoce por una URL de conexión, y la capa de datos es la única que le habla.
 - Las consultas que usa la aplicación (`SELECT`, `INSERT`, `UPDATE`) viven en `backend/.../datos/`, no en `base-de-datos/` (AR-04). `consultas.sql` es solo para mostrar en el video.
 
 ## Convenciones

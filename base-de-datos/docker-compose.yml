@@ -14,7 +14,9 @@ services:
       TZ: America/Lima
       PGTZ: America/Lima
     ports:
-      - "5432:5432"
+      # Puerto de la PC: 5432 por defecto. Si ya hay un PostgreSQL instalado usando el 5432,
+      # levantar con DB_PUERTO=5433 y arrancar el backend con DB_URL=jdbc:postgresql://localhost:5433/tienda
+      - "${DB_PUERTO:-5432}:5432"
     volumes:
       - datos-tienda:/var/lib/postgresql/data
       # Solo se ejecutan cuando el volumen está vacío, en orden alfabético: primero tablas, luego semilla.

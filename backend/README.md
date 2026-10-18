@@ -17,4 +17,4 @@ Se ejecuta desde esta carpeta, con la base de datos ya levantada (`docker compos
 ./mvnw spring-boot:run
 ```
 
-La conexión se configura con las variables de entorno `DB_URL`, `DB_USUARIO` y `DB_CLAVE` (por defecto apuntan al contenedor local). Las pruebas (`./mvnw test`) usan H2 en memoria y no necesitan Docker.
+La conexión se configura con las variables de entorno `DB_URL`, `DB_USUARIO` y `DB_CLAVE` (por defecto apuntan al contenedor local). Las pruebas (`./mvnw test`) usan H2 en memoria y no necesitan Docker. Después de un `git pull`, usar `./mvnw clean test` / `./mvnw clean spring-boot:run` para no arrastrar archivos viejos de `target/`.

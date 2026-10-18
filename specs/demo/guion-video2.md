@@ -4,7 +4,7 @@
 
 ## Antes de grabar
 
-- [ ] `./mvnw test` en verde.
+- [ ] `./mvnw clean test` en verde.
 - [ ] Dejar la BD en los datos semilla justo antes de grabar: desde `base-de-datos/`, `docker compose down -v` y `docker compose up -d`; luego arrancar el backend.
 - [ ] IDE y navegador con letra grande; consola visible al lado del navegador.
 - [ ] Diagrama de capas (`specs/arquitectura/arquitectura.md`, sección 2) en la diapositiva.

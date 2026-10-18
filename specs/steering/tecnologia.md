@@ -81,7 +81,7 @@ Dentro de `<build>`, junto a `<plugins>`:
 
 ## Base de datos en Docker (`base-de-datos/docker-compose.yml`)
 
-- Imagen `postgres:17-alpine`, contenedor `tiendacapas-db`, puerto `5432`.
+- Imagen `postgres:17-alpine`, contenedor `tiendacapas-db`, puerto `5432` de la PC (configurable con la variable `DB_PUERTO`, ver "Si el puerto 5432 ya está ocupado").
 - Base `tienda`, usuario `tienda`, contraseña `tienda` (credenciales de demo, no de producción).
 - Al crearse por **primera vez** (volumen vacío), el contenedor ejecuta `schema.sql` y luego `data.sql` (montados como `01-schema.sql` y `02-data.sql` en `/docker-entrypoint-initdb.d`).
 - Los datos se guardan en el volumen `datos-tienda`: **sobreviven** a reinicios del backend y del contenedor.
@@ -118,6 +118,29 @@ docker compose up -d
 - Detener la BD conservando los datos: `docker compose stop`
 - Pruebas (no necesitan Docker): `./mvnw test` desde `backend/`
 - En Windows (PowerShell) usar `.\mvnw.cmd` en lugar de `./mvnw`.
+- Después de un `git pull`, compilar con `clean` (`./mvnw clean test`, `./mvnw clean spring-boot:run`): así no quedan en `target/` archivos de una versión anterior (por ejemplo, un `schema.sql` viejo hace fallar las pruebas).
+
+### Si el puerto 5432 ya está ocupado
+
+Pasa cuando la PC ya tiene un PostgreSQL instalado: el contenedor no puede publicar el 5432 (o el backend termina conectándose al PostgreSQL local y falla el usuario `tienda`). Se usa otro puerto, por ejemplo 5433, y se le avisa al backend con `DB_URL`.
+
+Windows (PowerShell):
+
+```powershell
+cd base-de-datos
+$env:DB_PUERTO="5433"; docker compose up -d
+cd ..\backend
+$env:DB_URL="jdbc:postgresql://localhost:5433/tienda"; .\mvnw.cmd spring-boot:run
+```
+
+Linux / macOS / Git Bash:
+
+```bash
+cd base-de-datos && DB_PUERTO=5433 docker compose up -d
+cd ../backend && DB_URL=jdbc:postgresql://localhost:5433/tienda ./mvnw spring-boot:run
+```
+
+Para no escribirlo cada vez, se puede crear `base-de-datos/.env` con la línea `DB_PUERTO=5433` (lo lee `docker compose`; no se sube al repo).
 
 ## `backend/src/main/resources/application.properties`
 

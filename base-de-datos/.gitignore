@@ -1,2 +1,0 @@
-# Configuración local de docker compose (por ejemplo DB_PUERTO=5433)
-.env

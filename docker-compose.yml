@@ -1,0 +1,50 @@
+# TiendaCapas · Las tres piezas en contenedores.
+#
+#   Navegador ──► frontend (nginx) ──/api/──► backend (Spring Boot) ──JDBC──► db (PostgreSQL)
+#
+# Todo:                        docker compose up -d --build     → abrir http://localhost:8080
+# Solo la BD (para desarrollo): docker compose up -d db          → y el backend con ./mvnw spring-boot:run
+# Ver el recorrido por capas:   docker compose logs -f backend
+# Detener (conserva datos):     docker compose stop
+# Reiniciar de cero:            docker compose down -v           (borra los datos; se recrean tablas y semilla)
+#
+# Puertos de la PC configurables (archivo .env o variables): FRONT_PUERTO (8080) y DB_PUERTO (5432).
+
+services:
+  db:
+    build: ./base-de-datos
+    image: tiendacapas-db:1.0
+    container_name: tiendacapas-db
+    ports:
+      # Solo para consultar la BD desde la PC (psql, IDE) o correr el backend fuera de Docker.
+      # Si ya hay un PostgreSQL usando el 5432: DB_PUERTO=5433 y backend local con DB_URL=jdbc:postgresql://localhost:5433/tienda
+      - "${DB_PUERTO:-5432}:5432"
+    volumes:
+      - datos-tienda:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: tiendacapas-backend:1.0
+    container_name: tiendacapas-backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/tienda
+      DB_USUARIO: tienda
+      DB_CLAVE: tienda
+    depends_on:
+      db:
+        condition: service_healthy
+    # Sin "ports": el backend no se publica en la PC. Solo el frontend (nginx) le habla por la red interna.
+
+  frontend:
+    build: ./frontend
+    image: tiendacapas-frontend:1.0
+    container_name: tiendacapas-frontend
+    ports:
+      - "${FRONT_PUERTO:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  datos-tienda:

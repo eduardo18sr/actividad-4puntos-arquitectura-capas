@@ -1,0 +1,6 @@
+# El contexto de construcción es la raíz del repo: solo se envía lo que la imagen del backend necesita.
+*
+!backend/pom.xml
+!backend/src
+!base-de-datos/schema.sql
+!base-de-datos/data.sql

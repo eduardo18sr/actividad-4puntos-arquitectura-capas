@@ -4,7 +4,7 @@ Diseño por capa. Carpetas: `frontend/`, `backend/` (paquete base `pe.edu.ulima.
 
 ## Base de datos (`base-de-datos/`, PostgreSQL en Docker)
 
-`docker-compose.yml` levanta el contenedor `tiendacapas-db` (`postgres:17-alpine`, puerto 5432, base/usuario/clave `tienda`) y, al crearse por primera vez, ejecuta `schema.sql` y luego `data.sql`. Detalle en `specs/steering/tecnologia.md`.
+`base-de-datos/Dockerfile` construye la imagen `tiendacapas-db:1.0` (`postgres:17-alpine` + `schema.sql` y `data.sql`); el `docker-compose.yml` de la raíz la levanta como `tiendacapas-db` (puerto 5432, base/usuario/clave `tienda`) y, al crearse por primera vez, ejecuta `schema.sql` y luego `data.sql`. Frontend y backend también tienen su imagen. Detalle en `specs/steering/tecnologia.md`.
 
 `base-de-datos/schema.sql`
 

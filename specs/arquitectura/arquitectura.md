@@ -42,7 +42,18 @@ flowchart TB
 | `VentaController` | Spring Web (`@RestController`) | Recibir JSON, llamar al servicio, devolver respuesta o error 400 |
 | `VentaService` | Spring (`@Service`, `@Transactional`) | Validar RN-01/RN-02, calcular total (RN-03), descontar stock y guardar |
 | `ProductoRepository`, `VentaRepository` | Spring JDBC (`JdbcTemplate`) | `SELECT`, `INSERT`, `UPDATE` |
-| PostgreSQL | Contenedor Docker (`base-de-datos/docker-compose.yml`) | Tablas `producto` y `venta`; datos persistentes en un volumen |
+| PostgreSQL | Contenedor `tiendacapas-db` (`base-de-datos/Dockerfile`) | Tablas `producto` y `venta`; datos persistentes en un volumen |
+
+### Despliegue en contenedores (vista física)
+
+```mermaid
+flowchart LR
+    B["Navegador"] -- "http://localhost:8080" --> F["tiendacapas-frontend<br/>nginx<br/>index.html · app.js"]
+    F -- "/api/ → backend:8080" --> K["tiendacapas-backend<br/>Java 21 · Spring Boot<br/>presentación · negocio · datos"]
+    K -- "JDBC → db:5432" --> D[("tiendacapas-db<br/>PostgreSQL 17<br/>volumen datos-tienda")]
+```
+
+Las mismas reglas de capas se ven en la red: el navegador solo conoce a nginx; el backend no se publica en la PC; solo la capa de datos del backend abre conexiones a PostgreSQL.
 
 ## 3. Recorrido de "Registrar venta" (secuencia)
 
@@ -90,4 +101,4 @@ Si una regla falla, `VentaService` lanza `VentaException`; el controlador la con
 - **A favor**: fácil de entender, de repartir entre integrantes y de probar por capa; los cambios quedan localizados.
 - **En contra**: algunas llamadas solo "pasan" por una capa (p. ej. listar ventas); todo se despliega junto, así que no se puede escalar una capa por separado (eso ya sería multi-tier o microservicios).
 - **Frente a MVC**: MVC organiza la interfaz; las capas organizan todo el sistema. Se complementan.
-- **Frente a Multi-Tier**: las capas (presentación, negocio, datos) son lógicas y corren en un solo proceso. Que la BD esté en su propio contenedor es una decisión de **despliegue** (vista física); el estilo que se demuestra es la separación lógica en capas cerradas.
+- **Frente a Multi-Tier**: el estilo que se demuestra es la separación **lógica** en capas cerradas (presentación → negocio → datos), visible en los paquetes y sus `import`. Que cada pieza corra en su contenedor es la vista **física** (despliegue): las capas se pueden desplegar juntas o separadas sin cambiar el código. Multi-Tier pone el foco en esa separación física (escalar y desplegar cada nivel por su cuenta); aquí se usa solo para facilitar la ejecución.

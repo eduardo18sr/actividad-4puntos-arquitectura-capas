@@ -1,0 +1,5 @@
+# Configuración local de docker compose (por ejemplo DB_PUERTO=5433, FRONT_PUERTO=8081)
+.env
+
+# IDE
+.idea/
